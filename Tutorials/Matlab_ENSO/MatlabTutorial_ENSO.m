@@ -123,11 +123,11 @@ tmp=squeeze(sst(t,:,:));
 %~~~~~~~~ Plot a time mean SST map ~~~~~~~~~~
 % When you run the loop above, can you see a problem with the color bar that makes it hard to interpret what is happening?
 
-%The problem with color bar is that it doesn't have fixed limits. The range
-%of color shown is changing and the values that go with each color are also
-%changing. This makes it difficult to track the changes in SST occuring
-%because many of the changes shown over time result from the changing
-%limits of the colorbar not the actual oceanic conditions.
+% The problem with color bar is that it doesn't have fixed limits. The range
+% of color shown is changing and the values that go with each color are also
+% changing. This makes it difficult to track the changes in SST occuring
+% because many of the changes shown over time result from the changing
+% limits of the colorbar not the actual oceanic conditions.
 
 % use the caxis command to solve this problem
 %%
@@ -135,7 +135,7 @@ figure(3);clf
 for t=1:length(time)
     pcolor(lon,lat,squeeze(sst(t,:,:)))
     
-    %sets limits for the color bar axis
+    % sets limits for the color bar axis
     caxis([-5 , 35])
     
     % converts the decimal year dates to month/day/year time format and
@@ -177,7 +177,7 @@ title('Average Global Sea Surface Temperatures from 1960-2011');
 % and press enter
 % what does this produce?
 
-%It creates an array that moves from 1 to 100 in increments of 12. 
+% It creates an array that moves from 1 to 100 in increments of 12. 
 
 % Type:
 time(1:12:end)

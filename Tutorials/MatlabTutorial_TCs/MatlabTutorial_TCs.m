@@ -118,7 +118,7 @@ end
 
 figure(5);
 clf
-plot(first_year : last_year, storms_per_year);
+plot(first_year : last_year, smoothdata(storms_per_year, 'movmean', 6));
 
 figure(6);
 clf
@@ -161,6 +161,7 @@ function plotStormsByYears(lower_year, upper_year, longm, latm, yeari, fig_num)
 
     for i = index_range
         plot(longm(i, :), latm(i, :), 'o-g');
-        plot(longm(i, 1), latm(i, 1), 'x');
     end
+
+    plot(longm(index_range, 1), latm(index_range, 1), 'x');
 end

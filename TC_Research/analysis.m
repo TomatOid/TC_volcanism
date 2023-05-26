@@ -41,3 +41,13 @@ for i = 1 : length(eruption_times)
         tropics = [tropics eruption_times(i)];
     end
 end
+
+plot(time, aod550)
+sl = xline(south, 'r');
+tl = xline(tropics, 'g');
+nl = xline(north, 'm');
+yline(threshold, '--');
+xlabel('Year');
+ylabel('Optical Aerosol Depth');
+set(gca, 'Yscale', 'log');
+legend([sl(1) tl(1) nl(1)], 'Southern Eruption', 'Tropical Eruption', 'Northern Eruption');
