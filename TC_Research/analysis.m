@@ -1,6 +1,6 @@
 load 'volcano_data.mat'
 
-threshold = 0.022;
+threshold = 0.015;
 eruption_times = time(find(diff(aod550 >= threshold) == 1));
 
 % Do a merge-sort-like pass to find closest matches between datasets
@@ -28,6 +28,9 @@ while (j <= length(eruption_times))
     j = j + 1;
 end
 
+diff_filter = [diff(transpose(eruption_times)) inf] > 8;
+eruption_times = eruption_times(diff_filter);
+
 south = [];
 tropics = [];
 north = [];
@@ -43,10 +46,9 @@ for i = 1 : length(eruption_times)
 end
 
 filtered_events = sort([tropics north]);
-diff_filter = [diff(filtered_events) inf] > 8;
-filtered_events = filtered_events(diff_filter);
 
 figure(1);
+clf;
 hold on;
 plot(time, aod550)
 %sl = xline(south, 'r');
@@ -66,9 +68,12 @@ storm_years = 850 : 1900;
 
 freqyear = freqyear_LMR21_all(1 : length(storm_years));
 
-fy_time_series = [storm_years; freqyear];
+vmax_LMR21_all = mean(reshape(vmax_LMR21_all, [100, length(vmax_LMR21_all) / 100]))
+
+fy_time_series = [storm_years; vmax_LMR21_all(1 : length(storm_years))];
 
 [fy_events, fy_comp] = coral_sea(transpose(fy_time_series), round(filtered_events) - 849, 3, 8);
 
 figure(2);
+clf;
 plot(-3 : 8, fy_comp);
