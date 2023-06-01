@@ -1,36 +1,19 @@
 load 'volcano_data.mat'
 
-threshold = 0.015;
+threshold = 0.04;
 eruption_times = time(find(diff(aod550 >= threshold) == 1));
 
-% Do a merge-sort-like pass to find closest matches between datasets
-j = 1;
-dir_indexes = zeros(length(eruption_times), 1);
+dir_indexes = find_nearest(eruption_times, event_time);
 
-while (j <= length(eruption_times) && eruption_times(j) <= event_time(1))
-    dir_indexes(j) = 1;
-    j = j + 1;
-end
+unfiltered_times = eruption_times;
 
-for i = 1 : length(event_time) - 1
-    if (j > length(eruption_times))
-        break
-    end
-
-    while ((j <= length(eruption_times)) && (eruption_times(j) >= event_time(i)) && (eruption_times(j) <= event_time(i + 1)))
-        dir_indexes(j) = i + (abs(eruption_times(j) - event_time(i)) > abs(eruption_times(j) - event_time(i + 1)));
-        j = j + 1;
-    end 
-end
-
-while (j <= length(eruption_times))
-    dir_indexes(j) = length(event_time);
-    j = j + 1;
-end
-
+% remove eruptions that are shortly followed by another eruption
+% this should remove noise from the SEA analysis
 diff_filter = [diff(transpose(eruption_times)) inf] > 8;
 eruption_times = eruption_times(diff_filter);
 
+% now use the matched datasets to bin eruption times into three
+% lattitude reigions
 south = [];
 tropics = [];
 north = [];
@@ -45,6 +28,7 @@ for i = 1 : length(eruption_times)
     end
 end
 
+% only include the tropics and the north to reduce noise
 filtered_events = sort([tropics north]);
 
 figure(1);
@@ -68,12 +52,15 @@ storm_years = 850 : 1900;
 
 freqyear = freqyear_LMR21_all(1 : length(storm_years));
 
-vmax_LMR21_all = mean(reshape(vmax_LMR21_all, [100, length(vmax_LMR21_all) / 100]))
+vmax_LMR21_all = mean(reshape(vmax_LMR21_all .^ 2, [100, length(vmax_LMR21_all) / 100]));
 
 fy_time_series = [storm_years; vmax_LMR21_all(1 : length(storm_years))];
 
-[fy_events, fy_comp] = coral_sea(transpose(fy_time_series), round(filtered_events) - 849, 3, 8);
+before = 3;
+after = 8;
+
+[fy_events, fy_comp] = coral_sea(transpose(fy_time_series), round(filtered_events) - 849, before, after);
 
 figure(2);
 clf;
-plot(-3 : 8, fy_comp);
+plot(-before : after, fy_comp);
