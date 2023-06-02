@@ -1,6 +1,6 @@
 load 'volcano_data.mat'
 
-threshold = 0.04;
+threshold = 0.22;
 eruption_times = time(find(diff(aod550 >= threshold) == 1));
 
 dir_indexes = find_nearest(eruption_times, event_time);
@@ -45,22 +45,65 @@ yline(threshold, '--');
 %legend([sl(1) tl(1) nl(1)], 'Southern Eruption', 'Tropical Eruption', 'Northern Eruption');
 xline(filtered_events);
 makepretty_axes('Year', 'Optical Aerosol Depth');
-print('figure1','-dpng', '-r300');
+%print('figure1','-dpng', '-r300');
 
 load '../Storm Sets/LMR21_Atl_storms.mat';
 storm_years = 850 : 1900;
 
 freqyear = freqyear_LMR21_all(1 : length(storm_years));
 
-vmax_LMR21_all = mean(reshape(vmax_LMR21_all .^ 2, [100, length(vmax_LMR21_all) / 100]));
+vmax_LMR21_all = sqrt(mean(reshape(vmax_LMR21_all .^ 2, [100, length(vmax_LMR21_all) / 100])));
 
-fy_time_series = [storm_years; vmax_LMR21_all(1 : length(storm_years))];
+fy_time_series = transpose([storm_years; vmax_LMR21_all(1 : length(storm_years))]);
 
 before = 3;
 after = 8;
 
-[fy_events, fy_comp] = coral_sea(transpose(fy_time_series), round(filtered_events) - 849, before, after);
+[fy_events, fy_comp] = coral_sea(fy_time_series, round(filtered_events) - 849, before, after);
 
+non_eruption_index = find(mean(reshape(aod550, [12, length(aod550) / 12])) < threshold / 6);
+non_eruption_index = non_eruption_index(non_eruption_index > before & non_eruption_index + after < length(aod550) / 12);
+num_resample = 1000;
+n_events = length(filtered_events);
+window = before + after + 1;
+rnd = zeros(window, num_resample);
+event_indices = zeros(1, n_events);
+
+for i = 1 : num_resample
+    event_indices = randsample(non_eruption_index, n_events);
+    [~, rnd(:, i)] = coral_sea(fy_time_series, event_indices, before, after);
+end
+
+%% SEA plotting code
+
+time_window = -before : after;
 figure(2);
 clf;
-plot(-before : after, fy_comp);
+plot(time_window, fy_events, ':');
+hold on;
+plot(time_window, fy_comp, '.-', 'MarkerSize', 10, 'LineWidth', 1, 'Color', 'k');
+hold on;
+
+% compute 95% CI
+rnd_ci = quantile(rnd, [0.05, 0.95], 2);
+
+t_area = [time_window, time_window(end : -1 : 1)];
+lower = rnd_ci(:, 1).';
+upper = rnd_ci(:, 2).';
+y_area = [lower, upper(end : -1 : 1)];
+fill(t_area, y_area, 'k', 'FaceAlpha', 0.2, 'LineStyle', 'none');
+hold on;
+
+% compute inner 2 quartiles
+rnd_ci = quantile(rnd, [0.25, 0.75], 2);
+
+t_area = [time_window, time_window(end : -1 : 1)];
+lower = rnd_ci(:, 1).';
+upper = rnd_ci(:, 2).';
+y_area = [lower, upper(end : -1 : 1)];
+fill(t_area, y_area, 'k', 'FaceAlpha', 0.2, 'LineStyle', 'none');
+hold on;
+
+makepretty_axes('Time from eruption event (Years)', 'Change in RMS max wind speed');
+xline(0, '--');
+
