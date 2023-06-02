@@ -1,6 +1,6 @@
 load 'volcano_data.mat'
 
-threshold = 0.22;
+threshold = 0.07;
 eruption_times = time(find(diff(aod550 >= threshold) == 1));
 
 dir_indexes = find_nearest(eruption_times, event_time);
@@ -29,7 +29,7 @@ for i = 1 : length(eruption_times)
 end
 
 % only include the tropics and the north to reduce noise
-filtered_events = sort([tropics north]);
+filtered_events = sort([north south]);
 
 figure(1);
 clf;
@@ -104,6 +104,9 @@ y_area = [lower, upper(end : -1 : 1)];
 fill(t_area, y_area, 'k', 'FaceAlpha', 0.2, 'LineStyle', 'none');
 hold on;
 
-makepretty_axes('Time from eruption event (Years)', 'Change in RMS max wind speed');
+axis([-before, after, -inf, inf]);
+makepretty_axes('Lag (Years)', 'Change in RMS max wind speed');
+title(['SEA of Storm Intensity, No Tropics']);
+subtitle(['AOD threshold = ' num2str(threshold) ', N = ' num2str(n_events)]);
 xline(0, '--');
-
+print(['sea_intensity_ns_double_thr_' num2str(threshold) '.png'], '-dpng', '-r400');
