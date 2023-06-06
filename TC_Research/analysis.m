@@ -1,12 +1,13 @@
 % TODO
-% Isolate single eruptions completely
+% Isolate single eruptions completely : Done
+% Make debug SEA plots of AOD to test the SEA code
 
 load 'volcano_data.mat'
 
 before = 3;
 after = 8;
 
-threshold = 0.07;
+threshold = 0.13;
 eruption_times = time(find(diff(aod550 >= threshold) == 1));
 eruption_stops = time(find(diff(aod550 >= threshold) == -1));
 
@@ -43,29 +44,25 @@ figure(1);
 clf;
 hold on;
 plot(time, aod550)
-%sl = xline(south, 'r');
-%tl = xline(tropics, 'g');
-%nl = xline(north, 'm');
 yline(threshold, '--');
-%xlabel('Year');
-%ylabel('Optical Aerosol Depth');
-%set(gca, 'Yscale', 'log');
-%legend([sl(1) tl(1) nl(1)], 'Southern Eruption', 'Tropical Eruption', 'Northern Eruption');
 xline(filtered_events);
 makepretty_axes('Year', 'Optical Aerosol Depth');
-%print('figure1','-dpng', '-r300');
-%% The slow part
 
-load '../Storm Sets/LMR21_Atl_storms.mat';
+%% SEA Analysis
+
+%load '../Storm Sets/LMR21_Atl_storms.mat';
 storm_years = 850 : 1900;
 
-freqyear = freqyear_LMR21_all(1 : length(storm_years));
+%freqyear = freqyear_LMR21_all(1 : length(storm_years));
 
-vmax_LMR21_all = sqrt(mean(reshape(vmax_LMR21_all .^ 2, [100, length(vmax_LMR21_all) / 100])));
+%vmax_LMR21_all = sqrt(mean(reshape(vmax_LMR21_all .^ 2, [100, length(vmax_LMR21_all) / 100])));
 
-fy_time_series = transpose([storm_years; vmax_LMR21_all(1 : length(storm_years))]);
+%duration = duration_LMR21_all(1 : length(storm_years));
+yearly_binned_aod = max(reshape(aod550, [12, length(aod550) / 12]))
 
-[fy_events, fy_comp] = coral_sea(fy_time_series, round(filtered_events) - 849, before, after);
+fy_time_series = transpose([storm_years; yearly_binned_aod]);
+
+[fy_events, fy_comp] = coral_sea(fy_time_series, floor(filtered_events) - 849, before, after);
 
 non_eruption_index = find(mean(reshape(aod550, [12, length(aod550) / 12])) < threshold / 6);
 non_eruption_index = non_eruption_index(non_eruption_index > before & non_eruption_index + after < length(aod550) / 12);
@@ -111,8 +108,8 @@ fill(t_area, y_area, 'k', 'FaceAlpha', 0.2, 'LineStyle', 'none');
 hold on;
 
 axis([-before, after, -inf, inf]);
-makepretty_axes('Lag (Years)', 'Change in RMS max wind speed');
-title(['SEA of Storm Intensity, No Other Eruptions in Window']);
+makepretty_axes('Lag (Years)', 'Change in Storm Duration (Hours)');
+title(['SEA of Storm Duration, -10 to 90 degrees N']);
 subtitle(['AOD threshold = ' num2str(threshold) ', N = ' num2str(n_events)]);
 xline(0, '--');
-print(['sea_intensity_nt_winfilter_thr_' num2str(threshold) '.png'], '-dpng', '-r400');
+print(['sea_duration_nt_thr_' num2str(threshold) '.png'], '-dpng', '-r400');
