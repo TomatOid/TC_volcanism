@@ -5,8 +5,8 @@
 load 'volcano_data.mat'
 
 % === set your control variables ===
-% can be duration, frequency, intensity, cluster(1,2,3,4) or aod
-test_var_name = 'cluster2';
+% can be duration, frequency, intensity, cluster(1,2,3) or aod
+test_var_name = 'cluster3';
 % reigions to include
 % n stands for north, t for tropics, and s for south
 reigions = 'nt';
@@ -16,11 +16,11 @@ before_window_filter = 4;
 after = 8;
 
 threshold = 0.13;
-control_threshold = 0.003;
+control_threshold = 0.005;
 eruption_times = time(find(diff(aod550 >= threshold) == 1));
 eruption_stops = time(find(diff(aod550 >= threshold) == -1));
-eruption_times = eruption_times(eruption_times > 1200);
-eruption_stops = eruption_stops(eruption_stops > 1200);
+%eruption_times = eruption_times(eruption_times > 1200);
+%eruption_stops = eruption_stops(eruption_stops > 1200);
 
 dir_indexes = find_nearest(eruption_times, event_time);
 
@@ -82,20 +82,22 @@ makepretty_axes('Year', 'Optical Aerosol Depth');
 
 %% SEA Analysis
 
-%load '../Storm Sets/LMR21_Atl_storms.mat';
-
 storm_years = 850 : 1900;
+folder_name = test_var_name;
 
 switch test_var_name
     case 'duration'
+        load('../Storm Sets/LMR21_Atl_storms.mat', 'duration_LMR21_all');
         test_var = duration_LMR21_all(1 : length(storm_years));
         plot_str = 'Storm Duration';
         y_str = 'Storm Duration (hours)';
     case 'frequency'
+        load('../Storm Sets/LMR21_Atl_storms.mat', 'freqyear_LMR21_all');
         test_var = freqyear_LMR21_all(1 : length(storm_years));
         plot_str = 'Storm Frequency';
         y_str = 'Storm Frequency';
     case 'intensity'
+        load('../Storm Sets/LMR21_Atl_storms.mat', 'vnetmax_LMR21_all');
         test_var = mean(reshape(vnetmax_LMR21_all, [100, length(vnetmax_LMR21_all) / 100]));
         test_var = test_var(1 : length(storm_years));
         plot_str = 'Storm Intensity';
@@ -104,23 +106,27 @@ switch test_var_name
         test_var = max(reshape(aod550, [12, length(aod550) / 12]));
         plot_str = 'Optical Aerosol Depth';
         y_str = 'Change in AOD';
-    case {'cluster1', 'cluster2', 'cluster3', 'cluster4'}
-        load 'clusters.mat'
+    case {'cluster1', 'cluster2', 'cluster3'}
+        load '3_clusters.mat'
         LMR_cluster = eval(sprintf('LMR_%s', test_var_name));
 
+
+        load('../Storm Sets/LMR21_Atl_storms.mat', 'yearstore_LMR21_all');
         test_var = hist(yearstore_LMR21_all(LMR_cluster), 850 : 1999);
         test_var = test_var(1 : length(storm_years));
         
         plot_str = sprintf('Cluster %s Membership', test_var_name(end));
         y_str = 'Change in Cluster Membership (storms / year)';
+        folder_name = 'cluster';
 end
 
 time_series = transpose([storm_years; test_var]);
 
-non_eruption_index = find(mean(reshape(aod550, [12, length(aod550) / 12])) < control_threshold);
+non_eruption = mean(reshape(aod550, [12, length(aod550) / 12])) < control_threshold;
+control_index = find(forward_distance(~non_eruption) > before & flip(forward_distance(flip(~non_eruption))) > after);
 
-[alligned, avg, rnd] = sea_with_control(time_series, floor(filtered_events), non_eruption_index, before, after);
 
+[alligned, avg, rnd] = sea_with_control(time_series, floor(filtered_events), control_index, before, after);
 %% SEA plotting code
 
 time_window = -before : after;
@@ -156,4 +162,7 @@ makepretty_axes('Lag (Years)', y_str);
 title(['SEA of ' plot_str '; ' hemi_str]);
 subtitle(['AOD threshold = ' num2str(threshold) ', N = ' num2str(length(filtered_events))]);
 xline(0, '--');
-print(['sea_' test_var_name '_fix_thr_' num2str(threshold) '.png'], '-dpng', '-r400');
+if ~isfolder(folder_name)
+    mkdir(folder_name);
+end
+print([folder_name '/sea_' test_var_name '_fix_thr_' num2str(threshold) '.png'], '-dpng', '-r300');
