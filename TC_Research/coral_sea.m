@@ -45,7 +45,7 @@ end
 
 for i=1:length(events)
     Xevents(:,i) = X(events(i)-before:events(i)+after,2);
-    Xevents(:,i) = Xevents(:,i)-mean(Xevents(1:before,i)); % remove mean over "before" of window
+    Xevents(:,i) = Xevents(:,i);%-mean(Xevents(1:before,i)); % remove mean over "before" of window
     %Xevents(:,i) = Xevents(:,i)-mean(Xevents(:,i)); % remove mean over "before" of window
 end
 
