@@ -7,17 +7,17 @@ load 'volcano_data.mat'
 
 % === set your control variables ===
 % can be duration, frequency, intensity, cluster(1,2,3) or aod
-test_var_name = 'frequency';
+test_var_name = 'intensity';
 % reigions to include
 % n stands for north, t for tropics, and s for south
 reigions = 'nts';
-before = 10;
+before = 20;
 % additional time before the window where no eruptions are allowed
-before_window_filter = 0;
+before_window_filter = -15;
 after = 10;
 
-threshold = 20;
-control_threshold = 1;
+threshold = 5;
+control_threshold = 0;
 eruption_times = vssi_year(vssi_global > threshold);
 %eruption_times = eruption_times(eruption_times > 1200);
 %eruption_stops = eruption_stops(eruption_stops > 1200);
@@ -123,13 +123,13 @@ end
 
 time_series = transpose([storm_years; test_var]);
 
-non_eruption = vssi_global < control_threshold;
+non_eruption = vssi_global <= control_threshold;
 % This filter was causing there to be an upward trend in the CI
-control_index = find(forward_distance(~non_eruption) > before & flip(forward_distance(flip(~non_eruption))) > after);
-%control_index = find(non_eruption);
+%control_index = find(forward_distance(~non_eruption) > before & flip(forward_distance(flip(~non_eruption))) > after);
+control_index = find(non_eruption);
 
 
-[test_seas, control_seas] = sea_with_control(time_series, floor(filtered_events), control_index, ceil(length(filtered_events) * 2 / 3), before, after);
+[test_seas, control_seas] = sea_with_control(time_series, floor(filtered_events), control_index, before, after);
 %% SEA plotting code
 
 time_window = -before : after;

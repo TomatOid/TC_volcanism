@@ -6,7 +6,7 @@ load 'volcano_data.mat'
 
 % === set your control variables ===
 % can be duration, frequency, intensity, cluster(1,2,3) or aod
-test_var_name = 'intensity';
+test_var_name = 'aod';
 % reigions to include
 % n stands for north, t for tropics, and s for south
 reigions = 'nt';
@@ -128,7 +128,7 @@ non_eruption = mean(reshape(aod550, [12, length(aod550) / 12])) < control_thresh
 control_index = find(non_eruption);
 
 
-[test_seas, control_seas] = sea_with_control(time_series, floor(filtered_events), control_index, ceil(length(filtered_events) * 2 / 3), before, after);
+[test_seas, control_seas] = sea_with_control(time_series, floor(filtered_events), control_index, before, after);
 %% SEA plotting code
 
 time_window = -before : after;
