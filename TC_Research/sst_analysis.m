@@ -57,6 +57,7 @@ mask = cast(reshape(land_bit, [length(lon), length(lat)]), 'single');
 mask(mask == 1) = NaN;
 for i = 1 : before + after + 1
     image_sea(:, :, i) = image_sea(:, :, i) + mask;
+    image_pscore(:, :, i) = image_pscore(:, :, i) + mask;
     image_sea(:, :, i) = (image_sea(:, :, i) - mean(image_sea(:, :, i), 'all', 'omitnan')) / std(image_sea(:, :, i), 1, 'all', 'omitnan');
 end
 
@@ -64,11 +65,21 @@ image_sea = permute(image_sea, [2, 1, 3]);
 image_pscore = permute(image_pscore, [2, 1, 3]);
 %image_sea(isnan(image_sea)) = 0;
 %axesm;
-image_sea = image_sea(25 : end - 17, :, :);
+image_pscore = image_pscore(25 : end - 17, :, :);
 image_lat = lat(25 : end - 17);
-clf;
-s = pcolor(lon_wrap, image_lat, image_sea(:, :, 6));
-set(s, 'edgecolor', 'none');
-datatip_z2cdata(s);
+%frames(before + after + 1) = struct('cdata', [], 'colormap', []);
+for loop_num = 1 : 10
+    clf;
+    for i = 1 : before + after + 1
+        s = pcolor(lon_wrap, image_lat, image_pscore(:, :, i));
+        colorbar();
+        set(s, 'edgecolor', 'none');
+        title(['SST, t = ', num2str(i - before - 1)]);
+        %datatip_z2cdata(s);
+        drawnow
+        %frames(i) = getframe;
+        pause(1);
+    end
+end
 %borders();
-colorbar();
+%movie(frames, 10, 1);
