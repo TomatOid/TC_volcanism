@@ -1,7 +1,8 @@
-function [test_seas, control_seas] = sea_with_control(time_series, event_times, control_indices, subsample_size, before, after)
+function [test_seas, control_seas] = sea_with_control(time_series, event_times, control_indices, before, after)
     event_times = sort(event_times);
     event_indices = find_nearest(event_times, time_series(:, 1));
     event_indices = event_indices(event_indices > before & event_indices + after < length(time_series(:, 1)));
+    subsample_size = ceil(length(event_indices) * (3 / 4));
 
     % remove events where the window will fall outside of the dataset
     control_indices = control_indices(control_indices > before & control_indices + after < length(time_series(:, 1)));

@@ -31,7 +31,4 @@ function [test_sea, p_score] = map_sea(time, map_series, event_times, control_in
     end
 
     p_score = squeeze(sum(control_ens < repmat(reshape(test_sea, [1, size(map_series(:, :, 1)), before + after + 1]), n_runs, 1, 1, 1), 1)) / n_runs;
-    hist(control_ens(:, 1, 1, 1));
-    hold on;
-    xline(test_sea(1, 1, 1));
 end

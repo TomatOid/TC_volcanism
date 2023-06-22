@@ -1,4 +1,4 @@
-function [filtered_events, control_index, test_var, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold)
+function [filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold)
 
     load 'volcano_data.mat'
 

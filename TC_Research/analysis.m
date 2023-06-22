@@ -17,68 +17,16 @@ after = 10;
 
 threshold = 0.13;
 control_threshold = 0.007;
-eruption_times = time(find(diff(aod550 >= threshold) == 1));
-eruption_stops = time(find(diff(aod550 >= threshold) == -1));
-%eruption_times = eruption_times(eruption_times > 1200);
-%eruption_stops = eruption_stops(eruption_stops > 1200);
 
-dir_indexes = find_nearest(eruption_times, event_time);
+[filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold)
 
-unfiltered_times = eruption_times;
-
-% remove eruptions that are shortly followed by another eruption
-% this should remove noise from the SEA analysis
-diff_filter_after  = [diff(transpose(eruption_times)) inf] > after;
-diff_filter_before = [inf diff(transpose(eruption_stops))] > before + before_window_filter;
-eruption_times = eruption_times(diff_filter_before & diff_filter_after);
-
-% now use the matched datasets to bin eruption times into three
-% lattitude reigions
-south = [];
-tropics = [];
-north = [];
-
-for i = 1 : length(eruption_times)
-    if (lat(dir_indexes(i)) < -20)
-        south = [south eruption_times(i)];
-    elseif (lat(dir_indexes(i)) > 20)
-        north = [north eruption_times(i)];
-    else
-        tropics = [tropics eruption_times(i)];
-    end
-end
-
-filtered_events = [];
-hemi_names = {};
-if (contains(reigions, 'n'))
-    filtered_events = [filtered_events north];
-    hemi_names = [hemi_names, {'North'}];
-end
-if (contains(reigions, 't'))
-    filtered_events = [filtered_events tropics];
-    hemi_names = [hemi_names, {'Tropics'}];
-end
-if (contains(reigions, 's'))
-    filtered_events = [filtered_events south];
-    hemi_names = [hemi_names, {'South'}];
-end
-
-hemi_names{end} = ['and ' hemi_names{end}];
-if (length(hemi_names) > 2)
-    hemi_str = strjoin(hemi_names, ', ');
-else
-    hemi_str = strjoin(hemi_names);
-end
-
-filtered_events = sort(filtered_events);
-
-figure(1);
-clf;
-hold on;
-plot(time, aod550)
-yline(threshold, '--');
-xline(filtered_events);
-makepretty_axes('Year', 'Optical Aerosol Depth');
+%figure(1);
+%clf;
+%hold on;
+%plot(time, aod550)
+%yline(threshold, '--');
+%xline(filtered_events);
+%makepretty_axes('Year', 'Optical Aerosol Depth');
 
 %% SEA Analysis
 
@@ -121,12 +69,6 @@ switch test_var_name
 end
 
 time_series = transpose([storm_years; test_var]);
-
-non_eruption = mean(reshape(aod550, [12, length(aod550) / 12])) < control_threshold;
-% This filter was causing there to be an upward trend in the CI
-%control_index = find(forward_distance(~non_eruption) > before & flip(forward_distance(flip(~non_eruption))) > after);
-control_index = find(non_eruption);
-
 
 [test_seas, control_seas] = sea_with_control(time_series, floor(filtered_events), control_index, before, after);
 %% SEA plotting code
