@@ -6,7 +6,7 @@ load 'volcano_data.mat'
 
 % === set your control variables ===
 % can be duration, frequency, intensity, cluster(1,2,3) or aod
-test_var_name = 'aod';
+test_var_name = 'frequency';
 % reigions to include
 % n stands for north, t for tropics, and s for south
 reigions = 'nt';
@@ -15,7 +15,7 @@ before = 5;
 before_window_filter = 1;
 after = 10;
 
-threshold = 0.13;
+threshold = 0.22;
 control_threshold = 0.007;
 
 [filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold)
@@ -68,9 +68,15 @@ switch test_var_name
         folder_name = 'cluster';
 end
 
+% add smoothing, we don't want anything that happens over a scale of 15-years influencing our results
+% 15 years is longer than an ENSO cycle
+
+test_var = test_var - movmean(test_var, 15);
+
 time_series = transpose([storm_years; test_var]);
 
 [test_seas, control_seas] = sea_with_control(time_series, floor(filtered_events), control_index, before, after);
+
 %% SEA plotting code
 
 time_window = -before : after;
