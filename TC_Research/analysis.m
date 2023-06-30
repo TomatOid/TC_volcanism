@@ -15,18 +15,18 @@ before = 5;
 before_window_filter = 1;
 after = 10;
 
-threshold = 0.22;
+threshold = 0.07;
 control_threshold = 0.007;
 
 [filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold)
 
-%figure(1);
-%clf;
-%hold on;
-%plot(time, aod550)
-%yline(threshold, '--');
-%xline(filtered_events);
-%makepretty_axes('Year', 'Optical Aerosol Depth');
+figure(1);
+clf;
+hold on;
+plot(time, aod550)
+yline(threshold, '--');
+xline(filtered_events);
+makepretty_axes('Year', 'Optical Aerosol Depth');
 
 %% SEA Analysis
 
@@ -64,14 +64,32 @@ switch test_var_name
         test_var = test_var(1 : length(storm_years));
         
         plot_str = sprintf('Cluster %s Membership', test_var_name(end));
-        y_str = 'Change in Cluster Membership (storms / year)';
+        y_str = 'Cluster Membership (storms / year)';
         folder_name = 'cluster';
+    case 'genlat'
+        load('../Storm Sets/LMR21_Atl_storms.mat', 'latstore_LMR21_all');
+        genesis_lats = latstore_LMR21_all(:, 1);
+        delete latstore_LMR21_all;
+        test_var = mean(reshape(genesis_lats, [100, length(genesis_lats) / 100]));
+        test_var = test_var(1 : length(storm_years));
+        
+        plot_str = 'Genesis Lattitudes';
+        y_str = 'Average Genisis Lattitude';
+    case 'genlon'
+        load('../Storm Sets/LMR21_Atl_storms.mat', 'longstore_LMR21_all');
+        genesis_lons = longstore_LMR21_all(:, 1);
+        delete longstore_LMR21_all;
+        test_var = mean(reshape(genesis_lons, [100, length(genesis_lons) / 100]));
+        test_var = test_var(1 : length(storm_years));
+
+        plot_str = 'Genesis Longitudes';
+        y_str = 'Average Genisis Longitudes';
 end
 
 % add smoothing, we don't want anything that happens over a scale of 15-years influencing our results
 % 15 years is longer than an ENSO cycle
 
-test_var = test_var - movmean(test_var, 15);
+%test_var = test_var - movmean(test_var, 15);
 
 time_series = transpose([storm_years; test_var]);
 
