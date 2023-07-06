@@ -6,7 +6,7 @@ load 'volcano_data.mat'
 
 % === set your control variables ===
 % can be duration, frequency, intensity, cluster(1,2,3) or aod
-test_var_name = 'frequency';
+test_var_name = 'relsst';
 % reigions to include
 % n stands for north, t for tropics, and s for south
 reigions = 'nt';
@@ -15,7 +15,7 @@ before = 5;
 before_window_filter = 1;
 after = 10;
 
-threshold = 0.07;
+threshold = 0.22;
 control_threshold = 0.007;
 
 [filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold)
@@ -83,7 +83,27 @@ switch test_var_name
         test_var = test_var(1 : length(storm_years));
 
         plot_str = 'Genesis Longitudes';
-        y_str = 'Average Genisis Longitudes';
+        y_str = 'Average Genesis Longitudes';
+    case 'relsst'
+        load 'SST_aso.mat'
+        SST = SST_seasonal;
+        % 1D version is same box - (30S to 30N) range
+        mask = get_landmask(lon, lat);
+        mask(mask == 1) = NaN;
+        SST_relative = SST + repmat(mask, 1, 1, length(SST));
+        lat_window = find_nearest([7.5, 22.5], lat);
+        lon_window = find_nearest(mod([-70, -20] + 360, 360), lon);
+        MDR_mean = mean(SST_relative(lon_window(1) : lon_window(2), lat_window(1) : lat_window(2), :), [1, 2], 'omitnan');
+
+        lat_window = find_nearest([-30, 30], lat);
+        lon_window = find_nearest(mod([-70, -20] + 360, 360), lon);
+        tropical_mean = mean(SST_relative(lon_window(1) : lon_window(2), lat_window(1) : lat_window(2), :), [1, 2], 'omitnan');
+
+        test_var = squeeze(MDR_mean - tropical_mean).';
+        test_var = test_var(1 : length(storm_years));
+
+        plot_str = 'Relative SSTs';
+        y_str = 'MDR mean - tropical mean';
 end
 
 % add smoothing, we don't want anything that happens over a scale of 15-years influencing our results
