@@ -23,7 +23,7 @@ function mask = get_landmask(lon, lat)
     ix(ix < 0) = ix(ix < 0) + NSX;
     ix(ix >= NSX) = ix(ix >= NSX) - NSX;
     ix1 = floor(ix / 32);
-    ix2 = ix - ix1 * 32;
+    ix2 = ix - ix1 * 32 + 1;
     iy = round((LAT + 90)*100);
     iy(iy < 0) = 0;
     iy(iy >= NSY) = NSY - 1;

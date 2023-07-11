@@ -15,7 +15,7 @@ before = 5;
 before_window_filter = 1;
 after = 10;
 
-threshold = 0.22;
+threshold = 0.13;
 control_threshold = 0.007;
 
 [filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold)
@@ -35,18 +35,18 @@ folder_name = test_var_name;
 
 switch test_var_name
     case 'duration'
-        load('../Storm Sets/LMR21_Atl_storms.mat', 'duration_LMR21_all');
+        load('LMR20_Atl_storms_lite.mat', 'duration_LMR21_all');
         test_var = duration_LMR21_all(1 : length(storm_years));
         plot_str = 'Storm Duration';
         y_str = 'Storm Duration (hours)';
     case 'frequency'
-        load('../Storm Sets/LMR21_Atl_storms.mat', 'freqyear_LMR21_all');
-        test_var = freqyear_LMR21_all(1 : length(storm_years));
+        load('LMR20_Atl_storms_lite.mat', 'freqyear');
+        test_var = freqyear(1 : length(storm_years));
         plot_str = 'Storm Frequency';
         y_str = 'Storm Frequency';
     case 'intensity'
-        load('../Storm Sets/LMR21_Atl_storms.mat', 'vnetmax_LMR21_all');
-        test_var = mean(reshape(vnetmax_LMR21_all, [100, length(vnetmax_LMR21_all) / 100]));
+        load('LMR20_Atl_storms_lite.mat', 'vnetmax');
+        test_var = mean(reshape(vnetmax, [100, length(vnetmax) / 100]));
         test_var = test_var(1 : length(storm_years));
         plot_str = 'Storm Intensity';
         y_str = 'Average Max Wind Velocity (knots)';
@@ -59,7 +59,7 @@ switch test_var_name
         LMR_cluster = eval(sprintf('LMR_%s', test_var_name));
 
 
-        load('../Storm Sets/LMR21_Atl_storms.mat', 'yearstore_LMR21_all');
+        load('LMR20_Atl_storms_lite.mat', 'yearstore_LMR21_all');
         test_var = hist(yearstore_LMR21_all(LMR_cluster), 850 : 1999);
         test_var = test_var(1 : length(storm_years));
         
@@ -67,7 +67,7 @@ switch test_var_name
         y_str = 'Cluster Membership (storms / year)';
         folder_name = 'cluster';
     case 'genlat'
-        load('../Storm Sets/LMR21_Atl_storms.mat', 'latstore_LMR21_all');
+        load('LMR20_Atl_storms_lite.mat', 'latstore_LMR21_all');
         genesis_lats = latstore_LMR21_all(:, 1);
         delete latstore_LMR21_all;
         test_var = mean(reshape(genesis_lats, [100, length(genesis_lats) / 100]));
@@ -76,7 +76,7 @@ switch test_var_name
         plot_str = 'Genesis Lattitudes';
         y_str = 'Average Genisis Lattitude';
     case 'genlon'
-        load('../Storm Sets/LMR21_Atl_storms.mat', 'longstore_LMR21_all');
+        load('LMR20_Atl_storms_lite.mat', 'longstore_LMR21_all');
         genesis_lons = longstore_LMR21_all(:, 1);
         delete longstore_LMR21_all;
         test_var = mean(reshape(genesis_lons, [100, length(genesis_lons) / 100]));
@@ -154,4 +154,4 @@ xline(0, '--');
 if ~isfolder(folder_name)
     mkdir(folder_name);
 end
-print([folder_name '/sea_' test_var_name '_fix_thr_' num2str(threshold) '.png'], '-dpng', '-r300');
+print([folder_name '/sea_' test_var_name '_20_thr_' num2str(threshold) '.png'], '-dpng', '-r300');

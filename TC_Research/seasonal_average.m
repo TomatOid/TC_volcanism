@@ -1,9 +1,9 @@
 clear
-load 'SST_LMR21_AM21.mat'
+load 'sst_lmr20_am21.mat'
 
-varnames = { 'SST' };
-month_start = 8;
-month_end = 10;
+varnames = { 't_surf' };
+month_start = 1;
+month_end = 12;
 
 for name = varnames
     name = char(name);

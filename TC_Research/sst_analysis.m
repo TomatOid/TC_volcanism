@@ -13,7 +13,9 @@ test_var_name = 'rel_sst';
 
 [filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold);
 
-load 'sst_annual.mat'
+load 'sst_annual_raw.mat'
+%SST = t_surf_seasonal;
+%sst_years = min(Years) : max(Years); 
 
 filtered_events = [1808];
 mask_land = 1;
@@ -81,9 +83,11 @@ end
 
 %land = readgeotable('landareas.shp');
 lon_wrap = wrapTo180(lon);
-lon_wrap = circshift(lon_wrap, length(lon) / 2);
-image_sea = circshift(sea, length(lon) / 2, 1);
-image_pscore = circshift(pscore, length(lon) / 2, 1);
+rotate_by = length(lon) - find(lon_wrap < 0, 1) + 1;
+lon_wrap = circshift(lon_wrap, rotate_by);
+
+image_sea = circshift(sea, rotate_by, 1);
+image_pscore = circshift(pscore, rotate_by, 1);
 
 if (mask_land)
     mask = get_landmask(lon_wrap, lat);
@@ -97,7 +101,7 @@ if (mask_land)
 end
 %image_sea = (image_sea - repmat(mean(image_sea, 3), 1, 1, before + after + 1)) ./ repmat(std(image_sea, 1, 3), 1, 1, before + after + 1);
 
-image_sea(image_sea == 0) = NaN;
+%image_sea(image_sea == 0) = NaN;
 image_sea = permute(image_sea, [2, 1, 3]);
 image_pscore = permute(image_pscore, [2, 1, 3]);
 %image_sea(isnan(image_sea)) = 0;
@@ -137,14 +141,14 @@ for loop_num = 1 : 1
         hold on;
 
         borders('countries', 'color', 'k');
-        stipple(stipple_lon, stipple_lat, is_signif);
+        %stipple(stipple_lon, stipple_lat, is_signif);
         if (is_zero_centered)
             colormap(redblue);
         else
             colormap(jet);
         end
         colorbar();
-        %caxis([lo_color, hi_color]);
+        caxis([lo_color, hi_color]);
         title([plot_str, ', t = ', num2str(i - before - 1), ', AOD threshold = ', num2str(threshold)]);
         drawnow
 
