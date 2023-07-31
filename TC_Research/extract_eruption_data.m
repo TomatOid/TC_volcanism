@@ -8,8 +8,6 @@ function [filtered_events, control_index, hemi_str] = extract_eruption_data(reig
     %eruption_times = eruption_times(eruption_times > 1200);
     %eruption_stops = eruption_stops(eruption_stops > 1200);
 
-    dir_indexes = find_nearest(eruption_times, event_time);
-
     unfiltered_times = eruption_times;
 
     % remove eruptions that are shortly followed by another eruption
@@ -18,6 +16,7 @@ function [filtered_events, control_index, hemi_str] = extract_eruption_data(reig
     diff_filter_before = [inf diff(transpose(eruption_stops))] > before + before_window_filter;
     eruption_times = eruption_times(diff_filter_before & diff_filter_after);
 
+    dir_indexes = find_nearest(eruption_times, event_time);
     % now use the matched datasets to bin eruption times into three
     % lattitude reigions
     south = [];
@@ -25,9 +24,9 @@ function [filtered_events, control_index, hemi_str] = extract_eruption_data(reig
     north = [];
 
     for i = 1 : length(eruption_times)
-        if (lat(dir_indexes(i)) < -20)
+        if (lat(dir_indexes(i)) < -10)
             south = [south eruption_times(i)];
-        elseif (lat(dir_indexes(i)) > 20)
+        elseif (lat(dir_indexes(i)) > 10)
             north = [north eruption_times(i)];
         else
             tropics = [tropics eruption_times(i)];
@@ -49,7 +48,9 @@ function [filtered_events, control_index, hemi_str] = extract_eruption_data(reig
         hemi_names = [hemi_names, {'South'}];
     end
 
-    hemi_names{end} = ['and ' hemi_names{end}];
+    if (length(hemi_names) > 1)
+        hemi_names{end} = ['and ' hemi_names{end}];
+    end
     if (length(hemi_names) > 2)
         hemi_str = strjoin(hemi_names, ', ');
     else

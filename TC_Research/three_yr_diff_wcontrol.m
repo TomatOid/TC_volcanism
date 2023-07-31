@@ -1,4 +1,4 @@
-function [change, p_value] = three_yr_diff(time, map_series, event_times, control_indices)
+function [change, u_value] = three_yr_diff_wcontrol(time, map_series, event_times, control_indices)
     % event_times is assumed to be sorted
     event_indices = find_nearest(event_times, time);
     % remove all events where either a before or after window cannot be defined
@@ -25,7 +25,13 @@ function [change, p_value] = three_yr_diff(time, map_series, event_times, contro
         control_ens(i, :, :) = mean(delta(:, :, rand_indices), 3);
     end
 
-    p_value = squeeze(sum(control_ens < repmat(reshape(change, [1, size(map_series(:, :, 1))]), n_runs, 1, 1), 1)) / n_runs;
-    % we don't know anything if there is only one value in the row
-    p_value(std(control_ens, 0, 1) == 0) = 0.5;
+    shape = size(map_series(:, :, 1));
+    u_value = NaN(shape);
+    for x = 1 : shape(1)
+        for y = 1 : shape(2)
+            if (~all(isnan(map_series(x, y, :))))
+                [u_value(x, y), h] = ranksum(squeeze(delta(x, y, event_indices)), squeeze(control_ens(x, y, :)));
+            end
+        end
+    end
 end

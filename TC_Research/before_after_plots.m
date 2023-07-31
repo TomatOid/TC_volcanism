@@ -7,19 +7,23 @@ before = 3;
 before_window_filter = 0;
 after = 3;
 
-threshold = 0.13;
-control_threshold = 0.007;
+threshold = 0.22;
+control_threshold = 0.07;
 
 [filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold);
 
-%filtered_events = [1808];
+%filtered_events = [1902, 1912, 1932, 1963, 1982, 1991];
+%sort(filtered_events);
 
 load 'track_density_lmr20.mat'
+%load 'track_density_cera.mat'
+%load 'slp_annual_raw.mat'
 load 'sst_annual.mat'
 lat = cast(lat, 'single');
 lon = cast(lon, 'single');
 SST = track_density;
-%sst_years = prate_years;
+%sst_years = slp_years;
+%sst_years = 1901 : 2010;
 
 %mask = get_landmask(lon, lat);
 %mask(mask == 1) = NaN;
@@ -32,8 +36,15 @@ SST = track_density;
 %SST_relative = SST_relative - tropical_mean;
 
 %SST_del2 = del2(SST);
-[change, p_value] = three_yr_diff(sst_years, SST, filtered_events, control_index);
-
+do_multipanel = 0;
+if (do_multipanel)
+    [change, p_value] = three_yr_twopanel(sst_years, SST, filtered_events, control_index);
+else
+    [change, p_value] = three_yr_diff_wilcoxon(sst_years, SST, filtered_events);
+    %[change, p_value] = three_yr_diff(sst_years, SST, filtered_events, control_index);
+    change = reshape(change, [size(change), 1]);
+    p_value = reshape(p_value, [size(p_value), 1]);
+end
 
 mask = get_landmask(lon, lat);
 mask = zeros(size(mask));
@@ -45,27 +56,56 @@ lon_wrap = wrapTo180(lon);
 rotate_by = length(lon) - find(lon_wrap < 0, 1) + 1;
 lon_wrap = circshift(lon_wrap, rotate_by);
 
-im_change = circshift(im_change, rotate_by);
-im_p_value = circshift(im_p_value, rotate_by);
-im_mask = circshift(mask, rotate_by);
+im_change = circshift(im_change, rotate_by, 1);
+im_p_value = circshift(im_p_value, rotate_by, 1);
 
+im_change = permute(im_change, [2, 1, 3]);
+im_p_value = permute(im_p_value, [2, 1, 3]);
+
+%% 
 clf;
-s = pcolor(lon_wrap, lat, im_change.');
-datatip_z2cdata(s);
-hold on;
-c = contour(lon_wrap, lat, im_change.' + max(im_change, [], 'all'), 'linewidth', 1, 'linecolor', '#aaaaaa');
-hold on;
-ax = gca;
-ax.Color = '#f2eee9';
-set(s, 'edgecolor', 'none');
-s.FaceColor = 'interp';
-colormap(redblue);
-[LON, LAT] = meshgrid(lon_wrap, lat);
-is_signif = ((im_p_value > 0.95 | im_p_value < 0.05)) & ~isnan(im_change);
-stipple(LON, LAT, is_signif.');
-hold on;
-colorbar();
-caxis([-8, 8]);
-xlim([-100, 0]);
-ylim([-10, 60]);
-borders('countries', 'color', 'k');
+data_size = size(change);
+if (length(data_size) == 2)
+    data_size = [data_size, 1];
+    cm = redblue;
+    c_scale = max(abs(min(im_change, [], 'all')), max(im_change, [], 'all'));
+    ca = [-c_scale, c_scale];
+else
+    cm = jet;
+    ca = [min(im_change, [], 'all'), max(im_change, [], 'all')];
+end
+
+load_volcanic_lookup;
+
+for i = 1 : data_size(end);
+    nexttile;
+    s = pcolor(lon_wrap, lat, im_change(:, :, i));
+    %datatip_z2cdata(s);
+    hold on;
+    c = contour(lon_wrap, lat, im_change(:, :, i), 'linewidth', 1, 'linecolor', '#aaaaaa');
+    hold on;
+    ax = gca;
+    ax.Color = '#f2eee9';
+    set(s, 'edgecolor', 'none');
+    s.FaceColor = 'interp';
+    colormap(cm);
+    [LON, LAT] = meshgrid(lon_wrap, lat);
+    if (~do_multipanel)
+        %is_signif = (im_p_value(:, :, i) > 0.99 | im_p_value(:, :, i) < 0.01) & ~isnan(im_change(:, :, i));
+        is_signif = (im_p_value(:, :, i) < 0.1) & ~isnan(im_change(:, :, i));
+        stipple(LON, LAT, is_signif);
+        hold on;
+    else
+        t_cell = {'before', 'after'};
+        title(t_cell{i});
+    end
+    colorbar();
+    caxis(ca);
+    xlim([-100, 0]);
+    ylim([-10, 60]);
+    borders('countries', 'color', 'k');
+    hold on;
+
+    [~, volc_idx] = intersect(volcano_years, floor(filtered_events));
+    scatter(volcano_lon(volc_idx), volcano_lat(volc_idx), 30, 'filled', '^', 'MarkerFaceColor', '#D95319', 'MarkerEdgeColor', '#A2142F');
+end

@@ -1,4 +1,5 @@
-load('LMR20_Atl_storms_lite.mat', 'latstore', 'longstore');
+%load('LMR20_Atl_storms_lite.mat', 'latstore', 'longstore');
+load('Atlantic_AL_cera20c_reanal.mat', 'latstore', 'longstore');
 load('sst_annual.mat', 'lon', 'lat');
 track_density = zeros([length(lon), length(lat), length(latstore) / 100]);
 
@@ -16,4 +17,4 @@ for i = 1 : length(latstore) / 100
 end
 
 
-save('track_density_lmr20.mat', 'lon', 'lat', 'track_density');
+save('track_density_cera.mat', 'lon', 'lat', 'track_density');
