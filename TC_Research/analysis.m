@@ -1,4 +1,4 @@
-function output_fig = analysis(test_var_name, before, after, varargin)
+function output_fig = analysis(test_var_name, before, after, do_title, varargin)
     output_fig = gobjects(0);
     if ((length(varargin) == 3) && ~isstr(varargin{1}))
         [threshold, control_threshold, reigions] = varargin{:};
@@ -51,7 +51,7 @@ function output_fig = analysis(test_var_name, before, after, varargin)
             test_var = max(reshape(aod550, [12, length(aod550) / 12]));
             plot_str = 'Optical Aerosol Depth';
             y_str = 'Change in AOD';
-        case {'cluster1', 'cluster2', 'cluster3'}
+        case {'cluster1', 'cluster2', 'cluster3', 'cluster4'}
             load 'clusters.mat'
             LMR_cluster = eval(sprintf('LMR_%s', test_var_name));
 
@@ -112,8 +112,6 @@ function output_fig = analysis(test_var_name, before, after, varargin)
     % SEA plotting code
 
     time_window = -before : after;
-    figure(1);
-    clf;
 
     % compute 95% CI
     control_seas_ci = quantile(control_seas, [0.05, 0.95], 2);
@@ -124,6 +122,9 @@ function output_fig = analysis(test_var_name, before, after, varargin)
     y_area = [lower_quint, upper_quint(end : -1 : 1)];
     fill(t_area, y_area, 'k', 'FaceAlpha', 0.2, 'LineStyle', 'none');
     hold on;
+
+    y_min = min(lower_quint);
+    y_max = max(upper_quint);
 
     % compute inner 2 quartiles
     control_seas_ci = quantile(control_seas, [0.25, 0.75], 2);
@@ -138,14 +139,20 @@ function output_fig = analysis(test_var_name, before, after, varargin)
     plot(time_window, test_sea, '.-', 'MarkerSize', 10, 'LineWidth', 1, 'Color', 'k');
     hold on;
 
+    y_min = min(y_min, min(test_sea));
+    y_max = max(y_max, max(test_sea));
+    y_gap = y_max - y_min;
+
     ten_percent = test_signif <= 0.1 & test_signif > 0.05;
     five_percent = test_signif <= 0.05;
-    scatter(time_window(ten_percent), test_sea(ten_percent), 'x', 'LineWidth', 1.75, 'MarkerEdgeColor', 'k');
-    scatter(time_window(five_percent), test_sea(five_percent), '*', 'LineWidth', 1.75, 'MarkerEdgeColor', 'k');
+    scatter(time_window(ten_percent), test_sea(ten_percent), 'x', 'LineWidth', 1.75, 'MarkerEdgeColor', 'r');
+    scatter(time_window(five_percent), test_sea(five_percent), '*', 'LineWidth', 1.75, 'MarkerEdgeColor', 'r');
 
-    axis([-before, after, -inf, inf]);
+    axis([-before, after, y_min - 0.02 * y_gap, y_max + 0.02 * y_gap]);
     makepretty_axes('Lag (Years)', y_str);
-    title(['SEA of ' plot_str '; ' hemi_str]);
+    if (do_title)
+        title(['SEA of ' plot_str '; ' hemi_str]);
+    end
     if (is_lmr)
         subtitle(['AOD threshold = ' num2str(threshold) ', N = ' num2str(length(filtered_events))]);
     else

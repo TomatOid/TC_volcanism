@@ -23,6 +23,10 @@ function [filtered_events, control_index, hemi_str] = extract_eruption_data(reig
     tropics = [];
     north = [];
 
+    %south = squeeze(eruption_times(hemi(dir_indexes) < 1 & hemi(dir_indexes) > 0)).';
+    %north = squeeze(eruption_times(hemi(dir_indexes) > 1)).';
+    %tropics = squeeze(eruption_times(hemi(dir_indexes) == 1 | hemi(dir_indexes) < 0)).';
+
     for i = 1 : length(eruption_times)
         if (lat(dir_indexes(i)) < -10)
             south = [south eruption_times(i)];

@@ -124,7 +124,7 @@ row = 2; % set number of rows in final figure
 
 %load the coastline data (coastlat, coastlon)
      load coastlines;
-     %load 'clusters.mat';
+     load '3_clusters.mat';
 
 f = figure; 
 subplot(row,col,1); hold on;
