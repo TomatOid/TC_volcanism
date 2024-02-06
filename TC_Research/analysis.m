@@ -1,13 +1,13 @@
 function output_fig = analysis(test_var_name, before, after, do_title, varargin)
     output_fig = gobjects(0);
-    if ((length(varargin) == 3) && ~isstr(varargin{1}))
-        [threshold, control_threshold, reigions] = varargin{:};
+    if ((length(varargin) == 4) && ~isstr(varargin{1}))
+        [threshold, control_threshold, reigions, ensamble] = varargin{:};
         % additional time before the window where no eruptions are allowed
         before_window_filter = 1;
 
         [filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold);
         storm_years = 850 : 1900;
-        dataset = '../Storm Sets/LMR21_renamed.mat';
+        dataset = ['../Storm Sets/LMR21_ens', num2str(ensamble), '_renamed.mat'];
         is_lmr = 1;
     elseif (length(varargin) == 3)
         [dataset, storm_years, filtered_events] = varargin{:};

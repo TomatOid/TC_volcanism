@@ -1,11 +1,6 @@
-% TODO
-% Isolate single eruptions completely : Done
-% Make debug SEA plots of AOD to test the SEA code : Done
-
-
 % === set your control variables ===
 % can be duration, frequency, intensity, cluster(1,2,3) or aod
-test_var_name = 'cluster1';
+test_var_name = 'intensity';
 % reigions to include
 % n stands for north, t for tropics, and s for south
 reigions = 'nts';
@@ -13,14 +8,13 @@ before = 3;
 after = 8;
 
 thresholds = [0.07, 0.13, 0.22, 0.4]
-%threshold = 0.13;
+threshold = 0.22;
 control_threshold = 0.007;
 
-
 clf;
-for threshold = thresholds
+for i = 1 : 5
     nexttile;
-    analysis(test_var_name, before, after, false, threshold, control_threshold, reigions);
+    analysis(test_var_name, before, after, false, threshold, control_threshold, reigions, i);
 end
 
 
