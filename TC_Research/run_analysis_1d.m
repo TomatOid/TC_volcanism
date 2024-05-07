@@ -1,22 +1,51 @@
 % === set your control variables ===
 % can be duration, frequency, intensity, cluster(1,2,3) or aod
-test_var_name = 'intensity';
+test_var_name = 'frequency';
 % reigions to include
 % n stands for north, t for tropics, and s for south
-reigions = 'nts';
+% northern hemisphere eruptions produce interesting results
+reigions = 'n';
 before = 3;
 after = 8;
 
 thresholds = [0.07, 0.13, 0.22, 0.4]
-threshold = 0.22;
+threshold = 0.13;
 control_threshold = 0.007;
+
+%%
 
 clf;
 for i = 1 : 5
     nexttile;
-    analysis(test_var_name, before, after, false, threshold, control_threshold, reigions, i);
+    analysis(test_var_name, before, after, true, 'sea', threshold, control_threshold, reigions, i);
 end
 
+%%  
+
+before = 3;
+after = 3;
+before_all = [];
+after_all = [];
+for i = 1 : 5
+    [before_single, after_single] = analysis(test_var_name, before, after, false, 'pdf', threshold, control_threshold, reigions, i);
+
+    before_all = [before_all before_single];
+    after_all = [after_all after_single];
+end
+
+clf;
+%before is purple
+%hist(vertcat([before_all], [after_all]).');
+n_bins = 8;
+[counts_before, centers_before] = ksdensity(before_all);
+[counts_after, centers_after] = ksdensity(after_all);
+
+plot(centers_before, counts_before);
+hold on;
+plot(centers_after, counts_after);
+
+fprintf('before mean: %f\n', mean(before_all));
+fprintf('after mean: %f\n', mean(after_all));
 
 %% CERA
 

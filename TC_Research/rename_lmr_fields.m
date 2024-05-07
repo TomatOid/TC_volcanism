@@ -1,4 +1,4 @@
-for i = 1 : 5 
+for i = 5 : 5 
     fname = [ 'LMR21_ens', num2str(i), '_Atl_storms.mat' ];
     data_struct = load(['../Storm Sets/', fname]);
 
