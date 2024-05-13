@@ -52,11 +52,18 @@ function varargout = analysis(test_var_name, before, after, do_title, out_type, 
             plot_str = 'Optical Aerosol Depth';
             y_str = 'Change in AOD';
         case {'cluster1', 'cluster2', 'cluster3', 'cluster4'}
-            load 'clusters.mat'
-            LMR_cluster = eval(sprintf('LMR_%s', test_var_name));
+            clust_file = '../Storm Sets/LMR_Clust.mat';
+            load(clust_file);
 
+            % check if old or new format
+            if (~any(strcmp(who('-file', clust_file), 'yearstore')))
+                load(dataset, 'yearstore');
+                LMR_cluster = eval(sprintf('LMR_%s', test_var_name));
+            else
+                LMR_cluster = clust_LMR(:, end);
+                LMR_cluster = round(LMR_cluster) == str2num(test_var_name(end));
+            end
 
-            load(dataset, 'yearstore');
             test_var = hist(yearstore(LMR_cluster), 850 : 1999);
             test_var = test_var(1 : length(storm_years));
             

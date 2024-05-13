@@ -11,7 +11,7 @@
 %% Load data
 
 %meta = dir('*.mat');  %Script must be directed towards folder containing unclustered storm .mat files (kerry's prep.m output)
-load '../Storm Sets/LMR21_Atl_storms.mat'
+load('../Storm Sets/LMR21_combined.mat', 'latstore', 'lonstore', 'yearstore')
 
 %files = {meta.name}';
 %disp(files);
@@ -33,21 +33,14 @@ load '../Storm Sets/LMR21_Atl_storms.mat'
 
 %end %if loadflag
 clear R1 files
-%% Wildcard to find variables and eval to assign data to correct variable name
 
+lat = latstore;
+lon = lonstore;
+year = yearstore;
 
-olat=whos('*lat*');
-lat=eval(olat.name);
-
-olon=whos('*lon*');
-lon=eval(olon.name);
-
-oyear=whos('year*');
-year=eval(oyear.name);
-
-
-clear olat olon oyear
 %% Try out a bunch of cluster numbers 
+
+addpath(genpath('../CCToolbox'));
 
 lon = wrapTo180(lon);
 
@@ -109,11 +102,6 @@ xlabel('# Clusters'); ylabel('Log Likelihood');
 %pick 4 clusters to copy Kossin 2010
 %nclus = 4;
 %%
-%sort cluster
-for ii = 1:nclus;
-   xc = find(clust_LMR(:,nclus)==ii);
-   eval(sprintf('LMR_cluster%d = [xc];', ii))
-end
     
 
 %plot all the tracks in the clusters (identified by color)
@@ -124,7 +112,13 @@ row = 2; % set number of rows in final figure
 
 %load the coastline data (coastlat, coastlon)
      load coastlines;
-     load '3_clusters.mat';
+     load '../Storm Sets/LMR_Clust.mat';
+
+%sort cluster
+for ii = 1:nclus;
+   xc = find(clust_LMR(:,nclus)==ii);
+   eval(sprintf('LMR_cluster%d = [xc];', ii))
+end
 
 f = figure; 
 subplot(row,col,1); hold on;
@@ -185,24 +179,24 @@ ylim([0 60]); xlim([-100 -10]);
 set(gca,'fontweight','bold',  'linewidth', 1.5,'box','on');
 title('cluster 3'); ylabel('Latitude');xlabel('Longitude');
 
-%subplot(row,col,7); hold on; 
-%plot(coastlon, coastlat, '-k',  'linewidth', 1.5);
-%for ii=1:250
-%     p4 = plot(Y{LMR_cluster4(ii)}(:,1), Y{LMR_cluster4(ii)}(:,2),'-k','linewidth',1);p4.Color(4) = 0.25;
-%end    
-%title('cluster 4'); ylabel('rowLatitude');xlabel('Longitude');
-%ylim([0 60]); xlim([-100 -10]);
-%set(gca,'fontweight','bold',  'linewidth', 1.5,'box','on');
-%
-%subplot(row,col,8); hold on; 
-%plot(coastlon, coastlat, '-k',  'linewidth', 1.5);
-%for ii=1:250
-%    plot(Y{LMR_cluster4(ii)}(1,1), Y{LMR_cluster4(ii)}(1,2),'ok','MarkerSize',5,'linewidth',1);
-%%     p4 = plot(Y{indx_cluster4(ii)}(:,1), Y{indx_cluster4(ii)}(:,2),'-k','linewidth',1);p4.Color(4) = 0.5;
-%end    
-%title('cluster 4'); ylabel('Latitude');xlabel('Longitude');
-%ylim([0 60]); xlim([-100 -10]);
-%set(gca,'fontweight','bold',  'linewidth', 1.5,'box','on');
+subplot(row,col,7); hold on; 
+plot(coastlon, coastlat, '-k',  'linewidth', 1.5);
+for ii=1:250
+     p4 = plot(Y{LMR_cluster4(ii)}(:,1), Y{LMR_cluster4(ii)}(:,2),'-k','linewidth',1);p4.Color(4) = 0.25;
+end    
+title('cluster 4'); ylabel('rowLatitude');xlabel('Longitude');
+ylim([0 60]); xlim([-100 -10]);
+set(gca,'fontweight','bold',  'linewidth', 1.5,'box','on');
+
+subplot(row,col,8); hold on; 
+plot(coastlon, coastlat, '-k',  'linewidth', 1.5);
+for ii=1:250
+    plot(Y{LMR_cluster4(ii)}(1,1), Y{LMR_cluster4(ii)}(1,2),'ok','MarkerSize',5,'linewidth',1);
+%     p4 = plot(Y{indx_cluster4(ii)}(:,1), Y{indx_cluster4(ii)}(:,2),'-k','linewidth',1);p4.Color(4) = 0.5;
+end    
+title('cluster 4'); ylabel('Latitude');xlabel('Longitude');
+ylim([0 60]); xlim([-100 -10]);
+set(gca,'fontweight','bold',  'linewidth', 1.5,'box','on');
 
 % subplot(row,col,9); hold on;
 % plot(coastlon, coastlat, '-k',  'linewidth', 1.5);

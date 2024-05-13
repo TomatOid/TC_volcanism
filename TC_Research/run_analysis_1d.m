@@ -1,10 +1,10 @@
 % === set your control variables ===
-% can be duration, frequency, intensity, cluster(1,2,3) or aod
-test_var_name = 'frequency';
+% can be duration, frequency, intensity, cluster(1,2,3,4) or aod
+test_var_name = 'cluster4';
 % reigions to include
 % n stands for north, t for tropics, and s for south
 % northern hemisphere eruptions produce interesting results
-reigions = 'n';
+reigions = 'nts';
 before = 3;
 after = 8;
 
@@ -14,8 +14,8 @@ control_threshold = 0.007;
 
 %%
 
-clf;
-for i = 1 : 5
+%clf;
+for i = 1 : 1
     nexttile;
     analysis(test_var_name, before, after, true, 'sea', threshold, control_threshold, reigions, i);
 end
