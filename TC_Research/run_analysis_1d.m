@@ -47,6 +47,14 @@ plot(centers_after, counts_after);
 fprintf('before mean: %f\n', mean(before_all));
 fprintf('after mean: %f\n', mean(after_all));
 
+%% Chenoweth
+
+storm_years = 850 : 1999;
+volc_years = [1693, 1719, 1729, 1755, 1760, 1783, 1796, 1808, 1815, 1831, 1835, 1883, 1912, 1925, 1943, 1963, 1982, 1991];
+
+clf;
+analysis('n_tc', 5, 5, true, 'sea', 'chenoweth_combined.mat', storm_years, volc_years);
+
 %% CERA
 
 test_var_name = 'duration';

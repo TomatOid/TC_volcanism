@@ -22,8 +22,8 @@ function varargout = analysis(test_var_name, before, after, do_title, out_type, 
         hemi_str = 'North, Tropics, and South';
         is_lmr = 0;
     else
-        error(['invalid use of analysis, args must be either analysis(test_var_name, before, after, threshold, control_threshold, reigions) ' ...
-            'or analysis(test_var_name, before, after, dataset, storm_years, filtered_events)']);
+        error(['invalid use of analysis, args must be either analysis(test_var_name, before, after, do_title, out_type, threshold, control_threshold, reigions) ' ...
+            'or analysis(test_var_name, before, after, do_title, out_type, dataset, storm_years, filtered_events)']);
     end
     % SEA Analysis
 
@@ -108,6 +108,15 @@ function varargout = analysis(test_var_name, before, after, do_title, out_type, 
 
             plot_str = 'Relative SSTs';
             y_str = 'MDR mean - tropical mean';
+        case 'n_tc'
+            load(dataset, 'n_tc');
+
+
+            test_var = n_tc(1 : length(storm_years));
+
+            plot_str = 'Number of Emulated Chenoweth TCs';
+            y_str = 'Mean emulated Chenoweth storms';
+
         otherwise
             error([test_var_name, ' is not a valid test_var_name']);
     end
