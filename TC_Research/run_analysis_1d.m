@@ -50,11 +50,33 @@ fprintf('after mean: %f\n', mean(after_all));
 %% Chenoweth
 
 storm_years = 850 : 1999;
-volc_years = [1693, 1719, 1729, 1755, 1760, 1783, 1796, 1808, 1815, 1831, 1835, 1883, 1912, 1925, 1943, 1963, 1982, 1991];
+volc_years_gao = [1693, 1719, 1729, 1755, 1760, 1783, 1796, 1808, 1815, 1831, 1835, 1883, 1912, 1925, 1943, 1963, 1982, 1991];
 
+figure(1);
 clf;
-analysis('n_tc', 5, 5, true, 'sea', 'chenoweth_combined.mat', storm_years, volc_years);
 
+test_var_name = 'n_tc'
+before = 5;
+after = 5;
+
+analysis(test_var_name, before, after, true, 'sea', 'chenoweth_combined.mat', storm_years, volc_years_gao);
+
+figure(2);
+clf;
+
+[before_single, after_single] = analysis(test_var_name, 4, 4, false, 'pdf', 'chenoweth_combined.mat', storm_years, volc_years_gao);
+
+[counts_before, centers_before] = ksdensity(before_single);
+[counts_after, centers_after] = ksdensity(after_single);
+
+plot(centers_before, counts_before);
+hold on;
+plot(centers_after, counts_after);
+
+fprintf('before mean: %f\n', mean(before_single));
+fprintf('after mean: %f\n', mean(after_single));
+
+figure(1);
 %% CERA
 
 test_var_name = 'duration';
@@ -65,4 +87,4 @@ eruptions_nh = [1902, 1912, 1982, 1991];
 eruptions_sh = [1932, 1963];
 eruptions_all = [1902, 1912, 1932, 1963, 1982, 1991];
 clf;
-output_fig = analysis(test_var_name, before, after, true, 'cera20_standardized.mat', 1901 : 2010, eruptions_all);
+output_fig = analysis(test_var_name, before, after, true, 'sea', 'cera20_standardized.mat', 1901 : 2010, eruptions_all);

@@ -116,6 +116,14 @@ function varargout = analysis(test_var_name, before, after, do_title, out_type, 
 
             plot_str = 'Number of Emulated Chenoweth TCs';
             y_str = 'Mean emulated Chenoweth storms';
+        case 'n_ts'
+            load(dataset, 'n_ts');
+
+
+            test_var = n_ts(1 : length(storm_years));
+
+            plot_str = 'Number of Emulated Chenoweth Tropical Stormss';
+            y_str = 'Mean emulated Chenoweth storms';
 
         otherwise
             error([test_var_name, ' is not a valid test_var_name']);
