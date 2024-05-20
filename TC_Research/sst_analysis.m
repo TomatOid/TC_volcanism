@@ -9,7 +9,7 @@ after = 10;
 
 threshold = 0.22;
 control_threshold = 0.007;
-test_var_name = 'rel_sst';
+test_var_name = 'gen_density';
 
 [filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold);
 
@@ -17,7 +17,7 @@ load 'sst_annual_raw.mat'
 %SST = t_surf_seasonal;
 %sst_years = min(Years) : max(Years); 
 
-filtered_events = [1808];
+%filtered_events = [1808];
 mask_land = 1;
 map_bounds = [0, 60, -100, 0];
 
@@ -61,9 +61,10 @@ switch (test_var_name)
         plot_str = 'Relative SST';
         is_zero_centered = 0;
     case 'gen_density'
-        load 'genesis_density.mat'
+        load 'genesis_density_LMR21_combined.mat'
         test_var = genesis_density;
         %test_var = imgaussfilt(test_var, 1);
+        sst_years = 850 : 1999;
         [sea, pscore] = map_sea(sst_years, test_var, filtered_events, before, after);
         plot_str = 'Genesis Density';
         is_zero_centered = 0;

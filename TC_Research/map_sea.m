@@ -3,7 +3,7 @@
 function [test_sea, p_score] = map_sea(time, map_series, event_times, before, after, varargin)
     % event_times is assumed to be sorted
     event_indices = find_nearest(event_times, time);
-    event_indices = event_indices(event_indices > before & event_indices + after < length(time));
+    event_indices = event_indices(wevent_indices > before & event_indices + after < length(time));
     
     %length(control_indices)
 
