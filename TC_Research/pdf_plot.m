@@ -4,7 +4,6 @@ function plt = pdf_plot(before_all, after_all, varargin) % optionally add test_v
     [counts_after, centers_after] = ksdensity(after_all);
     median_after = mean(after_all);
 
-    clf;
     colormap(redblue);
     h1 = area(centers_before, counts_before);
     h1.FaceAlpha = 0.2;

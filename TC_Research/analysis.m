@@ -16,8 +16,8 @@ function varargout = analysis(test_var_name, before, after, do_title, out_type, 
         else
             error('invalid ensamble');
         end
-    elseif (length(varargin) == 3)
-        [dataset, storm_years, filtered_events] = varargin{:};
+    elseif (length(varargin) == 4)
+        [dataset, storm_years, filtered_events, hemi_str] = varargin{:};
         
         sparse_bool = zeros(length(storm_years));
         % sparse_bool is set to one on years when there is an eruption
@@ -26,7 +26,6 @@ function varargout = analysis(test_var_name, before, after, do_title, out_type, 
         eruption_lag = forward_distance(sparse_bool);
         eruption_duration = 3;
         control_index = find(eruption_lag > eruption_duration);
-        hemi_str = 'Global';
         is_lmr = 0;
     else
         error(['invalid use of analysis, args must be either analysis(test_var_name, before, after, do_title, out_type, threshold, control_threshold, reigions, ens) ' ...
