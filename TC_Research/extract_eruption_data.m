@@ -56,7 +56,7 @@ function [filtered_events, control_index, hemi_str] = extract_eruption_data(reig
         hemi_names{end} = ['and ' hemi_names{end}];
     end
     if (length(hemi_names) > 2)
-        hemi_str = strjoin(hemi_names, ', ');
+        hemi_str = 'Global';
     else
         hemi_str = strjoin(hemi_names);
     end

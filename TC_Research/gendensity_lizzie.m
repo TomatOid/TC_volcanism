@@ -6,6 +6,8 @@ function [x, y, z] = gendensity_lizzie(bas,latstore,longstore,freqyear,yearstore
 % filtered (if desired) to include only those events whose winds speeds
 % exceed some threshold, peakv. It requires installation of the
 % "m_map" routines. Units are events per 1 degree latitude square per year.
+%
+
 % 
 % Copyright 2009 WindRiskTech L.L.C.
 % Last modified March, 2016

@@ -7,8 +7,15 @@ function varargout = analysis(test_var_name, before, after, do_title, out_type, 
 
         [filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold);
         storm_years = 850 : 1900;
-        dataset = ['../Storm Sets/LMR21_ens', num2str(ensamble), '_renamed.mat'];
-        is_lmr = 1;
+        if (isnumeric(ensamble))
+            dataset = ['../Storm Sets/LMR21_ens', num2str(ensamble), '_renamed.mat'];
+            is_lmr = 1;
+        elseif (strcmp(ensamble, 'all'))
+            dataset = ['../Storm Sets/LMR21_combined.mat'];
+            is_lmr = 1;
+        else
+            error('invalid ensamble');
+        end
     elseif (length(varargin) == 3)
         [dataset, storm_years, filtered_events] = varargin{:};
         
@@ -19,115 +26,15 @@ function varargout = analysis(test_var_name, before, after, do_title, out_type, 
         eruption_lag = forward_distance(sparse_bool);
         eruption_duration = 3;
         control_index = find(eruption_lag > eruption_duration);
-        hemi_str = 'North, Tropics, and South';
+        hemi_str = 'Global';
         is_lmr = 0;
     else
-        error(['invalid use of analysis, args must be either analysis(test_var_name, before, after, do_title, out_type, threshold, control_threshold, reigions) ' ...
+        error(['invalid use of analysis, args must be either analysis(test_var_name, before, after, do_title, out_type, threshold, control_threshold, reigions, ens) ' ...
             'or analysis(test_var_name, before, after, do_title, out_type, dataset, storm_years, filtered_events)']);
     end
     % SEA Analysis
 
-    folder_name = test_var_name;
-
-    switch test_var_name
-        case 'duration'
-            load(dataset, 'duration');
-            test_var = duration(1 : length(storm_years));
-            plot_str = 'Storm Duration';
-            y_str = 'Storm Duration (hours)';
-        case 'frequency'
-            load(dataset, 'freqyear');
-            test_var = freqyear(1 : length(storm_years));
-            plot_str = 'Storm Frequency';
-            y_str = 'Storm Frequency';
-        case 'intensity'
-            load(dataset, 'vnetmax');
-            test_var = mean(reshape(vnetmax, [100, length(vnetmax) / 100]));
-            test_var = test_var(1 : length(storm_years));
-            plot_str = 'Storm Intensity';
-            y_str = 'Average Max Wind Velocity (knots)';
-        case 'aod'
-            load('volcano_data.mat');
-            test_var = max(reshape(aod550, [12, length(aod550) / 12]));
-            plot_str = 'Optical Aerosol Depth';
-            y_str = 'Change in AOD';
-        case {'cluster1', 'cluster2', 'cluster3', 'cluster4'}
-            clust_file = '../Storm Sets/LMR_Clust.mat';
-            load(clust_file);
-
-            % check if old or new format
-            if (~any(strcmp(who('-file', clust_file), 'yearstore')))
-                load(dataset, 'yearstore');
-                LMR_cluster = eval(sprintf('LMR_%s', test_var_name));
-            else
-                LMR_cluster = clust_LMR(:, end);
-                LMR_cluster = round(LMR_cluster) == str2num(test_var_name(end));
-            end
-
-            test_var = hist(yearstore(LMR_cluster), 850 : 1999);
-            test_var = test_var(1 : length(storm_years));
-            
-            plot_str = sprintf('Cluster %s Membership', test_var_name(end));
-            y_str = 'Cluster Membership (storms / year)';
-            folder_name = 'cluster';
-        case 'genlat'
-            load(dataset, 'latstore');
-            genesis_lats = latstore(:, 1);
-            clear latstore;
-            test_var = mean(reshape(genesis_lats, [100, length(genesis_lats) / 100]));
-            test_var = test_var(1 : length(storm_years));
-            
-            plot_str = 'Genesis Lattitudes';
-            y_str = 'Average Genisis Lattitude';
-        case 'genlon'
-            load(dataset, 'longstore');
-            genesis_lons = longstore(:, 1);
-            clear longstore;
-            test_var = mean(reshape(genesis_lons, [100, length(genesis_lons) / 100]));
-            test_var = test_var(1 : length(storm_years));
-
-            plot_str = 'Genesis Longitudes';
-            y_str = 'Average Genesis Longitudes';
-        case 'relsst'
-            load 'SST_aso.mat'
-            SST = SST_seasonal;
-            % 1D version is same box - (30S to 30N) range
-            mask = get_landmask(lon, lat);
-            mask(mask == 1) = NaN;
-            SST_relative = SST + repmat(mask, 1, 1, length(SST));
-            lat_window = find_nearest([7.5, 22.5], lat);
-            lon_window = find_nearest(mod([-70, -20] + 360, 360), lon);
-            MDR_mean = mean(SST_relative(lon_window(1) : lon_window(2), lat_window(1) : lat_window(2), :), [1, 2], 'omitnan');
-
-            lat_window = find_nearest([-30, 30], lat);
-            lon_window = find_nearest(mod([-70, -20] + 360, 360), lon);
-            tropical_mean = mean(SST_relative(lon_window(1) : lon_window(2), lat_window(1) : lat_window(2), :), [1, 2], 'omitnan');
-
-            test_var = squeeze(MDR_mean - tropical_mean).';
-            test_var = test_var(1 : length(storm_years));
-
-            plot_str = 'Relative SSTs';
-            y_str = 'MDR mean - tropical mean';
-        case 'n_tc'
-            load(dataset, 'n_tc');
-
-
-            test_var = n_tc(1 : length(storm_years));
-
-            plot_str = 'Number of Emulated Chenoweth TCs';
-            y_str = 'Mean emulated Chenoweth storms';
-        case 'n_ts'
-            load(dataset, 'n_ts');
-
-
-            test_var = n_ts(1 : length(storm_years));
-
-            plot_str = 'Number of Emulated Chenoweth Tropical Stormss';
-            y_str = 'Mean emulated Chenoweth storms';
-
-        otherwise
-            error([test_var_name, ' is not a valid test_var_name']);
-    end
+    [test_var, plot_str, y_str, folder_name] = get_title_and_data(test_var_name, true, dataset, storm_years);
 
     if (out_type == 'sea')
         time_series = transpose([storm_years; test_var]);
@@ -195,7 +102,7 @@ function varargout = analysis(test_var_name, before, after, do_title, out_type, 
         sparse_bool(floor(filtered_events) - storm_years(1) + 1) = 1;
         after_distance = forward_distance(sparse_bool);
         before_distance = flip(forward_distance(flip(sparse_bool)));
-        after_data = test_var((after_distance > 0) & (after_distance <= after));
+        after_data = test_var((after_distance >= 0) & (after_distance <= after));
         before_data = test_var((before_distance > 0) & (before_distance <= before));
 
         varargout{1} = before_data;

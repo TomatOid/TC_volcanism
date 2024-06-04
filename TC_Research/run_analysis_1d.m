@@ -1,12 +1,12 @@
 % === set your control variables ===
 % can be duration, frequency, intensity, cluster(1,2,3,4) or aod
-test_var_name = 'cluster4';
+test_var_name = 'intensity';
 % reigions to include
 % n stands for north, t for tropics, and s for south
 % northern hemisphere eruptions produce interesting results
 reigions = 'nts';
 before = 3;
-after = 8;
+after = 5;
 
 thresholds = [0.07, 0.13, 0.22, 0.4]
 threshold = 0.13;
@@ -14,15 +14,45 @@ control_threshold = 0.007;
 
 %%
 
-%clf;
-for i = 1 : 1
+clf;
+
+nexttile;
+analysis(test_var_name, before, after, true, 'sea', thresholds(1), control_threshold, reigions, 'all');
+
+title_str = get(get(gca, 'title'), 'string');
+title('');
+for i = 2 : length(thresholds)
     nexttile;
-    analysis(test_var_name, before, after, true, 'sea', threshold, control_threshold, reigions, i);
+    analysis(test_var_name, before, after, false, 'sea', thresholds(i), control_threshold, reigions, 'all');
 end
+
+sgt = sgtitle(title_str);
+sgt.FontSize = 18;
+
+%% combined dataset
+
+
+
+[filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, 1, after, threshold, control_threshold);
+
+storm_years = 850 : 1999;
+
+figure(1);
+clf;
+
+analysis(test_var_name, before, after, true, 'sea', threshold, control_threshold, reigions, 'all');
+
+
+figure(2);
+clf;
+before = 5;
+after = 3;
+[before_all, after_all] = analysis(test_var_name, before, after, true, 'pdf', threshold, control_threshold, reigions, 'all');
+pdf_plot(before_all, after_all, test_var_name);
 
 %%  
 
-before = 3;
+before = 5;
 after = 3;
 before_all = [];
 after_all = [];
@@ -36,13 +66,8 @@ end
 clf;
 %before is purple
 %hist(vertcat([before_all], [after_all]).');
-n_bins = 8;
-[counts_before, centers_before] = ksdensity(before_all);
-[counts_after, centers_after] = ksdensity(after_all);
 
-plot(centers_before, counts_before);
-hold on;
-plot(centers_after, counts_after);
+pdf_plot(before_all, after_all, test_var_name);
 
 fprintf('before mean: %f\n', mean(before_all));
 fprintf('after mean: %f\n', mean(after_all));
@@ -64,14 +89,9 @@ analysis(test_var_name, before, after, true, 'sea', 'chenoweth_combined.mat', st
 figure(2);
 clf;
 
-[before_single, after_single] = analysis(test_var_name, 4, 4, false, 'pdf', 'chenoweth_combined.mat', storm_years, volc_years_gao);
+[before_single, after_single] = analysis(test_var_name, 5, 3, false, 'pdf', 'chenoweth_combined.mat', storm_years, volc_years_gao);
 
-[counts_before, centers_before] = ksdensity(before_single);
-[counts_after, centers_after] = ksdensity(after_single);
-
-plot(centers_before, counts_before);
-hold on;
-plot(centers_after, counts_after);
+pdf_plot(before_single, after_single, test_var_name);
 
 fprintf('before mean: %f\n', mean(before_single));
 fprintf('after mean: %f\n', mean(after_single));

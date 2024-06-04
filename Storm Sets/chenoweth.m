@@ -40,5 +40,6 @@ n_dep = histc(yearstore((vnet_cross > 5) & (vnet_cross <= 33)), start_year : end
 n_ts = histc(yearstore((vnet_cross > 33) & (vnet_cross <= 63)), start_year : end_year) .* multiplier;
 % count tropical cyclones (above 63 knots)
 n_tc = histc(yearstore((vnet_cross > 63)), start_year : end_year) .* multiplier;
-
-save 'chenoweth_combined.mat' n_dep n_ts n_tc
+% count bias corrected hurricanes
+n_bh = histc(yearstore((vnet_cross > 44)), start_year : end_year) .* multiplier;
+save 'chenoweth_combined.mat' n_dep n_ts n_tc n_bh

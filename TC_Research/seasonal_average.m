@@ -1,9 +1,9 @@
 clear
 load 'sst_lmr20_am21.mat'
 
-varnames = { 't_surf' };
-month_start = 1;
-month_end = 12;
+varnames = { 'vert_wind_shear' };
+month_start = 6; % June
+month_end = 11;  % November
 
 for name = varnames
     name = char(name);

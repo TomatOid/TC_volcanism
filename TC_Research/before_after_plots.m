@@ -47,9 +47,9 @@ else
     p_value = reshape(p_value, [size(p_value), 1]);
 end
 
-%mask = get_landmask(lon, lat);
-%mask = zeros(size(mask));
-%mask(mask == 1) = NaN;
+mask = get_landmask(lon, lat);
+mask = zeros(size(mask));
+mask(mask == 1) = NaN;
 im_change = change; % + mask;
 im_p_value = p_value; % + mask;
 
