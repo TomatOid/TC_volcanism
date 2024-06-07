@@ -7,12 +7,14 @@ before = 3;
 before_window_filter = 0;
 after = 3;
 
-threshold = 0.13;
+threshold = 0.22;
 control_threshold = 0.05;
 
 [filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold);
 
-variable_name = 'lmr_gendensity';
+variable_name = 'lmr_sst';
+do_contour = true;
+do_landmask = true;
 
 switch (variable_name)
     case 'noaa_sst'
@@ -21,7 +23,9 @@ switch (variable_name)
         lat = cast(lat, 'single');
         lon = cast(lon, 'single');
     case 'lmr_sst'
-        load 'sst_annual_raw.mat';
+        load 't_surf_seasonal.mat';
+        SST = t_surf_seasonal;
+        sst_years = Annual;
     case 'lmr_trackdensity'
         load 'track_density.mat';
         load 'sst_annual.mat' 'sst_years';
@@ -31,6 +35,8 @@ switch (variable_name)
         %load 'sst_annual_raw.mat' 'sst_years';
         sst_years = 850 : 1999;
         SST = genesis_density;
+        do_contour = false;
+        do_landmask = false;
     case 'cera_trackdensity';
         filtered_events = [1902, 1912, 1932, 1963, 1982, 1991];
         load 'track_density_cera.mat';
@@ -47,11 +53,15 @@ else
     p_value = reshape(p_value, [size(p_value), 1]);
 end
 
-mask = get_landmask(lon, lat);
-mask = zeros(size(mask));
-mask(mask == 1) = NaN;
-im_change = change; % + mask;
-im_p_value = p_value; % + mask;
+im_change = change;
+im_p_value = p_value;
+if (do_landmask)
+    mask = get_landmask(lon, lat);
+    mask = zeros(size(mask));
+    mask(mask == 1) = NaN;
+    im_change = im_change + mask;
+    im_p_value = p_value + mask;
+end
 
 lon_wrap = wrapTo180(lon);
 rotate_by = length(lon) - find(lon_wrap < 0, 1) + 1;
@@ -82,8 +92,10 @@ for i = 1 : data_size(end);
     nexttile;
     s = pcolor(lon_wrap, lat, im_change(:, :, i));
     hold on;
-    c = contour(lon_wrap, lat, im_change(:, :, i), 'linewidth', 1, 'linecolor', '#aaaaaa');
-    hold on;
+    if (do_contour)
+        c = contour(lon_wrap, lat, im_change(:, :, i), 'linewidth', 1, 'linecolor', '#aaaaaa');
+        hold on;
+    end
     ax = gca;
     ax.Color = '#f2eee9';
     set(s, 'edgecolor', 'none');

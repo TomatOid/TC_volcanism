@@ -1,6 +1,6 @@
 % === set your control variables ===
 % can be duration, frequency, intensity, cluster(1,2,3,4) or aod
-test_var_name = 'frequency';
+test_var_name = 'duration';
 % reigions to include
 % n stands for north, t for tropics, and s for south
 % northern hemisphere eruptions produce interesting results
@@ -32,6 +32,10 @@ sgt.FontSize = 18;
 %% combined dataset
 
 
+test_var_name = 'duration';
+reigions = 'nts';
+before = 3;
+after = 5;
 
 [filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, 1, after, threshold, control_threshold);
 
@@ -100,7 +104,7 @@ figure(1);
 
 %% CERA
 
-test_var_name = 'frequency';
+test_var_name = 'intensity';
 before = 3;
 after = 5;
 
@@ -113,14 +117,12 @@ hemi_str = 'Global';
 clf;
 tiledlayout(2, 2);
 ax = subplot(2, 2, 1);
-analysis(test_var_name, before, after, true, 'sea', 'cera20_standardized.mat', 1901 : 2010, eruptions, hemi_str);
-ax.Title.String = [ax.Title.String, ' (CERA20)']
+analysis(test_var_name, before, after, true, 'sea', 'cera20_standardized.mat', 1901 : 2010, eruptions, [hemi_str, ' (CERA20)']);
 [before_all, after_all] = analysis(test_var_name, 5, 3, true, 'pdf', 'cera20_standardized.mat', 1901 : 2010, eruptions, hemi_str);
 subplot(2, 2, 2);
 pdf_plot(before_all, after_all, test_var_name);
 ax = subplot(2, 2, 3);
-analysis(test_var_name, before, after, true, 'sea', 'lmr21_combined.mat', 850 : 1999, eruptions, hemi_str);
-ax.Title.String = [ax.Title.String, ' (LMR21)']
+analysis(test_var_name, before, after, true, 'sea', 'lmr21_combined.mat', 850 : 1999, eruptions, [hemi_str, ' (LMR21)']);
 [before_all, after_all] = analysis(test_var_name, 5, 3, true, 'pdf', 'lmr21_combined.mat', 850 : 1999, eruptions, hemi_str);
 subplot(2, 2, 4);
 pdf_plot(before_all, after_all, test_var_name);

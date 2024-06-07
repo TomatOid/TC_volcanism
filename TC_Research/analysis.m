@@ -6,7 +6,7 @@ function varargout = analysis(test_var_name, before, after, do_title, out_type, 
         before_window_filter = 1;
 
         [filtered_events, control_index, hemi_str] = extract_eruption_data(reigions, before, before_window_filter, after, threshold, control_threshold);
-        storm_years = 850 : 1900;
+        storm_years = 850 : 1999;
         if (isnumeric(ensamble))
             dataset = ['../Storm Sets/LMR21_ens', num2str(ensamble), '_renamed.mat'];
             is_lmr = 1;

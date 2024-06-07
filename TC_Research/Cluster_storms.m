@@ -55,6 +55,8 @@ for ii=1:size(lat,1)
     X{ii}=[1:eot]';
 end %for ii
 
+%%
+
 %create a SCALAR structure with elements X (time) and Y (lon lat)
 s = struct('X',{},'Y',{});
 s(1).X = X;

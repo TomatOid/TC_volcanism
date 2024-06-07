@@ -1,7 +1,7 @@
 clear
-load 'sst_lmr20_am21.mat'
+load 'SSTs_BiasCorrected.mat'
 
-varnames = { 'vert_wind_shear' };
+varnames = { 't_surf' };
 month_start = 6; % June
 month_end = 11;  % November
 

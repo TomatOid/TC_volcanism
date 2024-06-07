@@ -19,8 +19,9 @@ function [test_var, plot_str, y_str, folder_name] = get_title_and_data(test_var_
         case 'intensity'
             if (load_data)
                 load(dataset, 'vnetmax');
-                test_var = mean(reshape(vnetmax, [100, length(vnetmax) / 100]));
-                test_var = test_var(1 : length(storm_years));
+                storms_per_year = length(vnetmax) / length(storm_years);
+                test_var = mean(reshape(vnetmax, [storms_per_year, length(vnetmax) / storms_per_year]));
+                %test_var = test_var(1 : length(storm_years));
             end
             plot_str = 'Storm Intensity';
             y_str = 'Average Max Wind Velocity (knots)';
